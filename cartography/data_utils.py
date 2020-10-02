@@ -8,7 +8,7 @@ import shutil
 
 from typing import Dict
 
-from cartography.glue_utils import read_glue_tsv
+from cartography.data_utils_glue import read_glue_tsv
 
 logger = logging.getLogger(__name__)
 

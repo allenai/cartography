@@ -1,0 +1,9 @@
+git+git://github.com/huggingface/transformers@189113d8910308b9f3509c6946b2147ce57a0bf7
+tqdm==4.43.0
+seaborn==0.10.0
+pandas==1.0.3
+numpy==1.18.2
+jsonnet==0.15.0
+tensorboardx==2.0
+spacy==2.1.9
+scikit-learn==0.22.2.post1
