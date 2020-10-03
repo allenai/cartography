@@ -1,6 +1,7 @@
 """
 Utilities for data handling.
 """
+import json
 import logging
 import os
 import pandas as pd
@@ -85,3 +86,19 @@ def copy_dev_test(task_name: str,
     shutil.copyfile(test_path, os.path.join(to_dir, test_filename))
   else:
     raise ValueError(f"No file found at {test_path}")
+
+
+def read_jsonl(file_path: str, key: str = "pairID"):
+  """
+  Reads JSONL file to recover mapping between one particular key field
+  in the line and the result of the line as a JSON dict.
+  If no key is provided, return a list of JSON dicts.
+  """
+  df = pd.read_json(file_path, lines=True)
+  records = df.to_dict('records')
+  logger.info(f"Read {len(records)} JSON records from {file_path}.")
+
+  if key:
+    assert key in df.columns
+    return {record[key]: record for record in records}
+  return records
