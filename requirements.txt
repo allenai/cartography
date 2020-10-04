@@ -2,6 +2,7 @@ git+git://github.com/huggingface/transformers@189113d8910308b9f3509c6946b2147ce5
 tqdm==4.43.0
 seaborn==0.10.0
 pandas==1.0.3
+matplotlib==3.2.1
 numpy==1.18.2
 jsonnet==0.15.0
 tensorboardx==2.0

@@ -11,8 +11,6 @@ from transformers.data.processors.utils import DataProcessor
 from cartography.classification.multiple_choice_utils import MCInputExample
 from cartography.data_utils import read_data
 
-logger = logging.getLogger(__name__)
-
 
 class WinograndeProcessor(DataProcessor):
 

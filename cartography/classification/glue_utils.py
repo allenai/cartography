@@ -12,6 +12,9 @@ from transformers.file_utils import is_tf_available
 if is_tf_available():
     import tensorflow as tf
 
+logging.basicConfig(
+  format="%(asctime)s - %(levelname)s - %(name)s - %(message)s", level=logging.INFO
+)
 logger = logging.getLogger(__name__)
 
 from cartography.data_utils_glue import convert_string_to_unique_number
