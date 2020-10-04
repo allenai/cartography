@@ -63,33 +63,3 @@ def read_training_dynamics(model_dir: os.path,
 
   logger.info(f"Found training dynamics for {len(train_dynamics)} train instances.")
   return train_dynamics
-
-
-def save_forgetting_stats(forgetting_stats, data_dir, task_name):
-  # Change data structure:
-  logger.info(f"Size of forgetting stats: {len(forgetting_stats)}")
-  stats = {}
-  for epoch, pairs in forgetting_stats.items():
-    if not len(pairs):
-      break
-    for pair in pairs:
-      train_ids = pair[0].tolist()
-      train_minibatch_results = pair[1]
-      for tid, tresult in zip(train_ids, train_minibatch_results):
-        if epoch == 0:
-          assert tid not in stats
-          stats[tid] = []
-        stats[tid].append(bool(tresult))
-  logger.info(f"Num examples: {len(stats)}")
-
-  # Create directory for example forgetting.
-  forgetting_dir = os.path.join(data_dir, f"forgetting_filtered/{task_name}")
-  if not os.path.exists(forgetting_dir):
-    os.makedirs(forgetting_dir)
-  forgetting_stats_file = os.path.join(forgetting_dir, "forgetting_stats.json")
-
-  # Dump forgetting trends into JSON file.
-  with open(forgetting_stats_file, "w") as outfile:
-    for key, trend in stats.items():
-      outfile.write(json.dumps({"guid": key, "trend": trend}) + "\n")
-  logger.info(f"Wrote forgetting stats to {forgetting_stats_file}")

@@ -72,9 +72,6 @@ class Params:
       self.evaluate_during_training_epoch : bool = configs.get("evaluate_during_training_epoch",
                                                                False)
 
-      # Keep track of forgetting examples
-      self.forgetting : bool = configs.get("forgetting", False)
-
       # Set this flag if you are using an uncased model.
       self.do_lower_case : bool =  configs.get("do_lower_case", True)
 

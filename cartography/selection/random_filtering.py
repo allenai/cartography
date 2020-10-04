@@ -6,6 +6,9 @@ import logging
 import os
 import pandas as pd
 
+logging.basicConfig(
+  format="%(asctime)s - %(levelname)s - %(name)s - %(message)s", level=logging.INFO
+)
 logger = logging.getLogger(__name__)
 
 from cartography.data_utils import read_data, convert_tsv_entries_to_dataframe, copy_dev_test
