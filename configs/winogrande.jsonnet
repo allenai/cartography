@@ -9,6 +9,8 @@ local TASK = "WINOGRANDE";
 local DATA_DIR = "/home/swabhas/data/glue/" + TASK + "/xl/" + TASK;
 local FEATURES_CACHE_DIR = DATA_DIR + "/cache_" + SEED ;
 
+local TEST = "/home/swabhas/data/glue/WINOGRANDE/wsc_superglue_trval_test.tsv";
+
 {
    "data_dir": DATA_DIR,
    "model_type": "roberta_mc",
@@ -20,4 +22,9 @@ local FEATURES_CACHE_DIR = DATA_DIR + "/cache_" + SEED ;
    "features_cache_dir": FEATURES_CACHE_DIR,
    "per_gpu_train_batch_size": BATCH_SIZE,
    "per_gpu_eval_batch_size": BATCH_SIZE,
+   "do_train": true,
+   "do_eval": true,
+   "do_test": true,
+   "test": TEST,
+   "patience": 5,
 }

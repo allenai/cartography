@@ -44,12 +44,12 @@ def read_training_dynamics(model_dir: os.path,
   """
   train_dynamics = {}
 
-  td_dir = os.path.join(model_dir, "training_dynamics/")
+  td_dir = os.path.join(model_dir, "training_dynamics")
   num_epochs = len([f for f in os.listdir(td_dir) if os.path.isfile(os.path.join(td_dir, f))])
 
   logger.info(f"Reading {num_epochs} files from {td_dir} ...")
   for epoch_num in tqdm.tqdm(range(num_epochs)):
-    epoch_file = os.path.join(td_dir, f"dynamics_epoch_{epoch_num}.json")
+    epoch_file = os.path.join(td_dir, f"dynamics_epoch_{epoch_num}.jsonl")
     assert os.path.exists(epoch_file)
 
     with open(epoch_file, "r") as infile:
@@ -61,5 +61,5 @@ def read_training_dynamics(model_dir: os.path,
           train_dynamics[guid] = {"gold": record["gold"], "logits": []}
         train_dynamics[guid]["logits"].append(record[f"logits_epoch_{epoch_num}"])
 
-  logger.info(f"Found training dynamics for {len(train_dynamics)} train instances.")
+  logger.info(f"Read training dynamics for {len(train_dynamics)} train instances.")
   return train_dynamics

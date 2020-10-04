@@ -9,6 +9,8 @@ local TASK = "SNLI";
 local DATA_DIR = "/home/swabhas/data/glue/" + TASK;
 local FEATURES_CACHE_DIR = DATA_DIR + "/cache_" + SEED ;
 
+local TEST = "/home/swabhas/data/glue/SNLI/diagnostic_test.tsv";
+
 {
    "data_dir": DATA_DIR,
    "model_type": "roberta",
@@ -18,5 +20,10 @@ local FEATURES_CACHE_DIR = DATA_DIR + "/cache_" + SEED ;
    "num_train_epochs": NUM_EPOCHS,
    "learning_rate": LEARNING_RATE,
    "features_cache_dir": FEATURES_CACHE_DIR,
-   "per_gpu_train_batch_size": BATCH_SIZE
+   "per_gpu_train_batch_size": BATCH_SIZE,
+   "do_train": true,
+   "do_eval": true,
+   "do_test": true,
+   "test": TEST,
+   "patience": 3
 }
