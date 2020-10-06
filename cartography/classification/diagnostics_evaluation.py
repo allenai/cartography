@@ -151,7 +151,7 @@ def evaluate_by_category(predictions,
   if mnli_hack:  # Workaround for HuggingFace Transformers hack.
     logger.warning("WARNING: EMPLOYING HACK! "
                    "In HuggingFace Transformers, MNLI labels are swapped in the RoBERTa model."
-                   "See: https://github.com/allenai/aflite/blob/master/scripts/glue/run_glue.py#L431"
+                   "See: https://github.com/huggingface/transformers/blob/v2.8.0/examples/run_glue.py#L350"
                    "Hence, for evaluation, these need to be swapped back.")
 
   with open(eval_filename, "w") as outfile:

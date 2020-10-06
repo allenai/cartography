@@ -146,7 +146,7 @@ class Params:
       self.server_port : str = configs.get("server_port", "")
 
 
-def save_args_to_file(params: Params, mode:str=""):
+def save_args_to_file(params: Params, mode: str = ""):
   """
   Saves the configs in `Params` to a json file, during train or eval mode.
   """

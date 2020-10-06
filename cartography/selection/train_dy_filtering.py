@@ -1,7 +1,14 @@
 """
-Filtering methods based on training dynamics.
+Filtering and dataset mapping methods based on training dynamics.
+By default, this module reads training dynamics from a given trained model and
+computes the metrics---confidence, variability, correctness,
+as well as baseline metrics of forgetfulness and threshold closeness
+for each instance in the training data.
+If specified, data maps can be plotted with respect to confidence and variability.
+Moreover, datasets can be filtered with respect any of the other metrics.
 """
 import argparse
+import json
 import logging
 import matplotlib.pyplot as plt
 import numpy as np
@@ -131,7 +138,7 @@ def compute_train_dy_metrics(training_dynamics, args):
                   'confidence',
                   'variability',
                   'correctness',
-                  'forgotfulness',]
+                  'forgetfulness',]
   df = pd.DataFrame([[guid,
                       i,
                       threshold_closeness_[guid],
@@ -171,17 +178,22 @@ def write_filtered_data(args, train_dy_metrics):
   """
   Filter data based on the given metric, and write it in TSV format to train GLUE-style classifier.
   """
-  # Writing the data --- CHANGE all 3 below: name, index, and sorting order (reverse or not.)
-  is_ascending = consider_ascending_order(args.metric)
+  # First save the args for filtering, to keep track of which model was used for filtering.
+  argparse_dict = vars(args)
+  with open(os.path.join(args.filtering_output_dir, f"filtering_configs.json"), "w") as outfile:
+    outfile.write(json.dumps(argparse_dict, indent=4, sort_keys=True) + "\n")
 
-  # Apply selections.
+  # Determine whether to sort data in ascending order or not, based on the metric.
+  is_ascending = consider_ascending_order(args.metric)
   if args.worst:
     is_ascending = not is_ascending
+
+  # Sort by selection.
   sorted_scores = train_dy_metrics.sort_values(by=[args.metric],
                                                ascending=is_ascending)
 
-  train_file_name = os.path.join(os.path.join(args.data_dir, args.task_name), f"train.tsv")
-  train_numeric, header = read_data(train_file_name, task_name=args.task_name, guid_as_int=True)
+  original_train_file = os.path.join(os.path.join(args.data_dir, args.task_name), f"train.tsv")
+  train_numeric, header = read_data(original_train_file, task_name=args.task_name, guid_as_int=True)
 
   for fraction in [0.01, 0.05, 0.10, 0.1667, 0.25, 0.3319, 0.50, 0.75]:
     outdir = os.path.join(args.filtering_output_dir,
@@ -221,12 +233,101 @@ def write_filtered_data(args, train_dy_metrics):
     logger.info(f"Wrote {num_samples} samples to {outdir}.")
 
 
+def plot_data_map(dataframe:pd.DataFrame,
+                  plot_dir:os.path,
+                  hue_metric:str = 'correct.',
+                  title:str = '',
+                  model:str = 'RoBERTa',
+                  show_hist: bool = False):
+    # Subsample data to plot, so the plot is not too busy.
+    dataframe = dataframe.sample(n=25000 if dataframe.shape[0] > 25000 else len(dataframe))
+
+    # Normalize correctness to a value between 0 and 1.
+    dataframe = dataframe.assign(corr_frac = lambda d: d.correctness / d.correctness.max())
+    dataframe['correct.'] = [f"{x:.1f}" for x in dataframe['corr_frac']]
+
+    main_metric = 'variability'
+    other_metric = 'confidence'
+
+    hue = hue_metric
+    num_hues = len(dataframe[hue].unique().tolist())
+    style = hue_metric if num_hues < 8 else None
+
+    if not show_hist:
+        fig, axs = plt.subplots(1, 1, figsize=(8, 4))
+        ax0 = axs
+    else:
+        fig = plt.figure(figsize=(16, 10), )
+        gs = fig.add_gridspec(2, 3, height_ratios=[5, 1])
+
+        ax0 = fig.add_subplot(gs[0, :])
+
+    # Make the scatterplot.
+    # Choose a palette.
+    pal = sns.diverging_palette(260, 15, n=num_hues, sep=10, center="dark")
+
+    plot = sns.scatterplot(x=main_metric,
+                           y=other_metric,
+                           ax=ax0,
+                           data=dataframe,
+                           hue=hue,
+                           palette=pal,
+                           style=style,
+                           s=30)
+
+    # Annotate Regions.
+    bb = lambda c: dict(boxstyle="round,pad=0.3", ec=c, lw=2, fc="white")
+    an1 = ax0.annotate("ambiguous", xy=(0.9, 0.5), xycoords="axes fraction", fontsize=15, color='black',
+                  va="center", ha="center", rotation=350, bbox=bb('black'))
+    an2 = ax0.annotate("easy-to-learn", xy=(0.27, 0.85), xycoords="axes fraction", fontsize=15, color='black',
+                  va="center", ha="center", bbox=bb('r'))
+    an3 = ax0.annotate("hard-to-learn", xy=(0.35, 0.25), xycoords="axes fraction", fontsize=15, color='black',
+                  va="center", ha="center", bbox=bb('b'))
+
+    if not show_hist:
+        plot.legend(ncol=1, bbox_to_anchor=[0.175, 0.5], loc='right')
+    else:
+        plot.legend(fancybox=True, shadow=True,  ncol=1)
+    plot.set_xlabel('variability')
+    plot.set_ylabel('confidence')
+
+    if show_hist:
+        plot.set_title(f"{title}-{model} Data Map", fontsize=17)
+
+        # Make the histograms.
+        ax1 = fig.add_subplot(gs[1, 0])
+        ax2 = fig.add_subplot(gs[1, 1])
+        ax3 = fig.add_subplot(gs[1, 2])
+
+        plott0 = dataframe.hist(column=['confidence'], ax=ax1, color='#622a87')
+        plott0[0].set_title('')
+        plott0[0].set_xlabel('confidence')
+        plott0[0].set_ylabel('density')
+
+        plott1 = dataframe.hist(column=['variability'], ax=ax2, color='teal')
+        plott1[0].set_title('')
+        plott1[0].set_xlabel('variability')
+
+        plot2 = sns.countplot(x="correct.", data=dataframe, color='#86bf91', ax=ax3)
+        ax3.xaxis.grid(True) # Show the vertical gridlines
+
+        plot2.set_title('')
+        plot2.set_xlabel('correctness')
+        plot2.set_ylabel('')
+
+    fig.tight_layout()
+    filename = f'{plot_dir}/{title}_{model}.pdf' if show_hist else f'figures/compact_{title}_{model}.pdf'
+    fig.savefig(filename, dpi=300)
+
+
 if __name__ == "__main__":
   parser = argparse.ArgumentParser()
-  parser.add_argument('--mode',
-                      choices=('display', 'filter', 'both', 'neither'),
-                      required=True,
-                      help="Whether to display scatter plots, filter subsets or both.")
+  parser.add_argument("--do_filter",
+                      action="store_true",
+                      help="Whether to filter data subsets based on specified `metric`.")
+  parser.add_argument("--do_plots",
+                      action="store_true",
+                      help="Whether to plot data maps and save as `pdf`.")
   parser.add_argument("--model_dir",
                       "-o",
                       required=True,
@@ -291,11 +392,8 @@ if __name__ == "__main__":
                            lines=True)
   logger.info(f"Metrics based on Training Dynamics written to {train_dy_filename}")
 
-  if args.mode == 'display' or args.mode == 'both':
-    model_name = args.model_dir.split("log_")[-1]
-    outdir = os.path.join(args.plots_dir, f"{args.task_name.lower()}_{model_name}")
-    if not os.path.exists(outdir):
-      os.makedirs(outdir)
-
-  if args.mode == 'filter' or args.mode == 'both':
+  if args.do_filter:
     write_filtered_data(args, train_dy_metrics)
+
+  if args.do_plotting:
+    plot_data_map(train_dy_metrics, args.plots_dir, title=args.task_name, show_hist=True)
