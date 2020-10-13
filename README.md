@@ -14,6 +14,8 @@ If using, please cite:
     year={2020}
 }
 ```
+This repository can be used to build Data Maps, like the one below.
+![Data Map for SNLI using a RoBERTa-Large classifier](./sample/SNLI_RoBERTa.pdf)
 
 ### Pre-requisites
 
@@ -32,9 +34,9 @@ python -m cartography.classification.run_glue \
     --do_eval \
     -o $MODEL_OUTPUT_DIR
 ```
-The best configurations for our experiments for each of the `$TASK`s (SNLI, MNLI, QNLI or WINOGRANDE) are provided under `configs/`.
+The best configurations for our experiments for each of the `$TASK`s (SNLI, MNLI, QNLI or WINOGRANDE) are provided under [configs](./configs).
 
-This produces a training dynamics directory `$MODEL_OUTPUT_DIR/training_dynamics`, see a sample under `sample/training_dynamics/`.
+This produces a training dynamics directory `$MODEL_OUTPUT_DIR/training_dynamics`, see a sample [here](./sample/training_dynamics/).
 
 *Note:* you can use any other set up to train your model (independent of this repository) as long as you produce the `dynamics_epoch_$X.jsonl` for plotting data maps, and filtering different regions of the data.
 The `.jsonl` file must contain the following fields for every training instance:
@@ -45,7 +47,7 @@ The `.jsonl` file must contain the following fields for every training instance:
 
 ### Plot Data Maps
 
-To plot data maps for a trained $MODEL (e.g. RoBERTa-Large) on a given $TASK (e.g. SNLI, MNLI, QNLI or WINOGRANDE):
+To plot data maps for a trained `$MODEL` (e.g. RoBERTa-Large) on a given `$TASK` (e.g. SNLI, MNLI, QNLI or WINOGRANDE):
 
 ```
 python -m cartography.selection.train_dy_filtering \
