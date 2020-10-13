@@ -15,7 +15,7 @@ If using, please cite:
 }
 ```
 This repository can be used to build Data Maps, like [this one for SNLI using a RoBERTa-Large classifier](./sample/SNLI_RoBERTa.pdf).
-![SNLI Data Map with RoBERTa-Large](./samples/SNLI_RoBERTa.png)
+![SNLI Data Map with RoBERTa-Large](./sample/SNLI_RoBERTa.png)
 
 ### Pre-requisites
 
@@ -72,3 +72,5 @@ python -m cartography.selection.train_dy_filtering \
 ```
 
 Supported `$TASK`s include SNLI, QNLI, MNLI and WINOGRANDE, and `$METRIC`s include `confidence`, `variability`, `correctness`, `forgetfulness` and `threshold_closeness`; see [paper](https://arxiv.org/abs/2009.10795) for more details.
+
+To select _hard-to-learn_ instances, set `$METRIC` as "confidence" and for _ambiguous_, set `$METRIC` as "variability". For _easy-to-learn_ instances: set `$METRIC` as "confidence" and use the flag `--worst`. 
