@@ -14,8 +14,8 @@ If using, please cite:
     year={2020}
 }
 ```
-This repository can be used to build Data Maps, like the one below.
-![Data Map for SNLI using a RoBERTa-Large classifier](./sample/SNLI_RoBERTa.pdf)
+This repository can be used to build Data Maps, like [this one for SNLI using a RoBERTa-Large classifier](./sample/SNLI_RoBERTa.pdf).
+![SNLI Data Map with RoBERTa-Large](./samples/SNLI_RoBERTa.png)
 
 ### Pre-requisites
 
