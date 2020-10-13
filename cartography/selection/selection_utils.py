@@ -36,7 +36,8 @@ def log_training_dynamics(output_dir: os.path,
 
 def read_training_dynamics(model_dir: os.path,
                            strip_last: bool = False,
-                           id_field: str = "guid"):
+                           id_field: str = "guid",
+                           burn_out: int = None):
   """
   Given path to logged training dynamics, merge stats across epochs.
   Returns:
@@ -46,6 +47,8 @@ def read_training_dynamics(model_dir: os.path,
 
   td_dir = os.path.join(model_dir, "training_dynamics")
   num_epochs = len([f for f in os.listdir(td_dir) if os.path.isfile(os.path.join(td_dir, f))])
+  if burn_out:
+    num_epochs = burn_out
 
   logger.info(f"Reading {num_epochs} files from {td_dir} ...")
   for epoch_num in tqdm.tqdm(range(num_epochs)):

@@ -150,7 +150,7 @@ def save_args_to_file(params: Params, mode: str = ""):
   """
   Saves the configs in `Params` to a json file, during train or eval mode.
   """
-  with open(os.path.join(params.output_dir, f"exemplars_config_{mode}.json"), "w") as outfile:
+  with open(os.path.join(params.output_dir, f"cartography_config_{mode}.json"), "w") as outfile:
     writable_params = vars(params)
 
     # torch.device needs to be cast into a string to be json compatible.

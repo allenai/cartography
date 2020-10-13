@@ -132,12 +132,12 @@ def diag_test_modifier(original_diag_tsv, output_tsv):
 def evaluate_by_category(predictions,
                          eval_filename,
                          mnli_hack = False,
-                         diagnostics_file_exemplars = None,
+                         diagnostics_file_carto = None,
                          diagnostics_file_original="/home/swabhas/diagnostics_nli/diagnostic-full.tsv"):
-  if not diagnostics_file_exemplars and not os.path.exists(diagnostics_file_exemplars):
-    diag_test_modifier(diagnostics_file_original, diagnostics_file_exemplars)
+  if not diagnostics_file_carto and not os.path.exists(diagnostics_file_carto):
+    diag_test_modifier(diagnostics_file_original, diagnostics_file_carto)
 
-  diagnostics_orig, diag_headers = read_glue_tsv(diagnostics_file_exemplars)
+  diagnostics_orig, diag_headers = read_glue_tsv(diagnostics_file_carto)
   diagnostics = {convert_string_to_unique_number(key): val for key, val in diagnostics_orig.items()}
 
   # Category-wise counts.

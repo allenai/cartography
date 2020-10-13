@@ -14,8 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """
-Finetuning the library models for sequence classification on GLUE
-(Bert, XLM, XLNet, RoBERTa, Albert, XLM-RoBERTa); modified for the exemplars dataset.
+Finetuning the library models for sequence classification on GLUE-style tasks
+(BERT, XLM, XLNet, RoBERTa, Albert, XLM-RoBERTa); modified for Dataset Cartography.
 """
 
 import _jsonnet
@@ -750,7 +750,7 @@ def run_transformer(args):
                 evaluate_by_category(predictions[args.task_name],
                                      mnli_hack=True if args.task_name in ["SNLI", "snli"] and "mnli" in args.output_dir else False,
                                      eval_filename=os.path.join(args.output_dir, f"eval_metrics_diagnostics.json"),
-                                     diagnostics_file_exemplars=args.test)
+                                     diagnostics_file_carto=args.test)
     logger.info(" **** Done ****")
 
 

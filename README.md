@@ -19,3 +19,54 @@ If using, please cite:
 
 This repository is based on the [HuggingFace Transformers](https://github.com/huggingface/transformers) library.
 <!-- Hyperparameter tuning is based on [HFTune](https://github.com/allenai/hftune). -->
+
+
+### Train GLUE-style model and compute training dynamics
+
+To train a GLUE-style model using this repository:
+
+```
+python -m cartography.classification.run_glue \
+    -c configs/$TASK.jsonnet \
+    --do_train \
+    --do_eval \
+    -o $MODEL_OUTPUT_DIR
+```
+The best configurations for our experiments for each of the `$TASK`s (SNLI, MNLI, QNLI or WINOGRANDE) are provided under `configs/`.
+
+This produces a training dynamics directory `$MODEL_OUTPUT_DIR/training_dynamics`, see a sample under `sample/training_dynamics/`.
+
+*Note:* you can use any other set up to train your model (independent of this repository) as long as you produce the `dynamics_epoch_$X.jsonl` for plotting data maps, and filtering different regions of the data.
+The `.jsonl` file must contain the following fields for every training instance:
+- `guid` : instance ID matching that in the original data file, for filtering,
+- `logits_epoch_$X` : logits for the training instance under epoch `$X`,
+- `gold` : index of the gold label, must match the logits array.
+
+
+### Plot Data Maps
+
+To plot data maps for a trained $MODEL (e.g. RoBERTa-Large) on a given $TASK (e.g. SNLI, MNLI, QNLI or WINOGRANDE):
+
+```
+python -m cartography.selection.train_dy_filtering \
+    --plot \
+    --task_name $TASK \
+    --model_dir $PATH_TO_MODEL_OUTPUT_DIR_WITH_TRAINING_DYNAMICS \
+    --model $MODEL_NAME
+```
+
+
+### Data Selection
+
+To select (different amounts of) data based on various metrics from training dynamics:
+
+```
+python -m cartography.selection.train_dy_filtering \
+    --filter \
+    --task_name $TASK \
+    --model_dir $PATH_TO_MODEL_OUTPUT_DIR_WITH_TRAINING_DYNAMICS \
+    --metric $METRIC \
+    --data_dir $PATH_TO_GLUE_DIR_WITH_ORIGINAL_DATA_IN_TSV_FORMAT
+```
+
+Supported `$TASK`s include SNLI, QNLI, MNLI and WINOGRANDE, and `$METRIC`s include `confidence`, `variability`, `correctness`, `forgetfulness` and `threshold_closeness`; see [paper](https://arxiv.org/abs/2009.10795) for more details.

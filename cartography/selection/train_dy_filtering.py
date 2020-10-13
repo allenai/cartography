@@ -93,7 +93,7 @@ def compute_train_dy_metrics(training_dynamics, args):
   if args.burn_out < num_tot_epochs:
     logger.info(f"Computing training dynamics. Burning out at {args.burn_out} of {num_tot_epochs}. ")
   else:
-    logger.info(f"Computing training dynamics across {num_tot_epochs}")
+    logger.info(f"Computing training dynamics across {num_tot_epochs} epochs")
   logger.info("Metrics computed: confidence, variability, correctness, forgetfulness, threshold_closeness")
 
   logits = {i: [] for i in range(num_tot_epochs)}
@@ -227,20 +227,27 @@ def write_filtered_data(args, train_dy_metrics):
         selected_id = selected.iloc[idx]["guid"]
         if args.task_name in ["SNLI", "MNLI"]:
           selected_id = int(selected_id)
+        elif args.task_name == "WINOGRANDE":
+          selected_id = str(int(selected_id))
         record = train_numeric[selected_id]
         outfile.write(record + "\n")
 
     logger.info(f"Wrote {num_samples} samples to {outdir}.")
 
 
-def plot_data_map(dataframe:pd.DataFrame,
-                  plot_dir:os.path,
-                  hue_metric:str = 'correct.',
-                  title:str = '',
-                  model:str = 'RoBERTa',
-                  show_hist: bool = False):
+def plot_data_map(dataframe: pd.DataFrame,
+                  plot_dir: os.path,
+                  hue_metric: str = 'correct.',
+                  title: str = '',
+                  model: str = 'RoBERTa',
+                  show_hist: bool = False,
+                  max_instances_to_plot = 55000):
+    # Set style.
+    sns.set(style='whitegrid', font_scale=1.6, font='Georgia', context='paper')
+    logger.info(f"Plotting figure for {title} using the {model} model ...")
+
     # Subsample data to plot, so the plot is not too busy.
-    dataframe = dataframe.sample(n=25000 if dataframe.shape[0] > 25000 else len(dataframe))
+    dataframe = dataframe.sample(n=max_instances_to_plot if dataframe.shape[0] > max_instances_to_plot else len(dataframe))
 
     # Normalize correctness to a value between 0 and 1.
     dataframe = dataframe.assign(corr_frac = lambda d: d.correctness / d.correctness.max())
@@ -254,13 +261,11 @@ def plot_data_map(dataframe:pd.DataFrame,
     style = hue_metric if num_hues < 8 else None
 
     if not show_hist:
-        fig, axs = plt.subplots(1, 1, figsize=(8, 4))
-        ax0 = axs
+        fig, ax0 = plt.subplots(1, 1, figsize=(8, 6))
     else:
-        fig = plt.figure(figsize=(16, 10), )
-        gs = fig.add_gridspec(2, 3, height_ratios=[5, 1])
-
-        ax0 = fig.add_subplot(gs[0, :])
+        fig = plt.figure(figsize=(14, 10), )
+        gs = fig.add_gridspec(3, 2, width_ratios=[5, 1])
+        ax0 = fig.add_subplot(gs[:, 0])
 
     # Make the scatterplot.
     # Choose a palette.
@@ -277,12 +282,19 @@ def plot_data_map(dataframe:pd.DataFrame,
 
     # Annotate Regions.
     bb = lambda c: dict(boxstyle="round,pad=0.3", ec=c, lw=2, fc="white")
-    an1 = ax0.annotate("ambiguous", xy=(0.9, 0.5), xycoords="axes fraction", fontsize=15, color='black',
-                  va="center", ha="center", rotation=350, bbox=bb('black'))
-    an2 = ax0.annotate("easy-to-learn", xy=(0.27, 0.85), xycoords="axes fraction", fontsize=15, color='black',
-                  va="center", ha="center", bbox=bb('r'))
-    an3 = ax0.annotate("hard-to-learn", xy=(0.35, 0.25), xycoords="axes fraction", fontsize=15, color='black',
-                  va="center", ha="center", bbox=bb('b'))
+    func_annotate = lambda  text, xyc, bbc : ax0.annotate(text,
+                                                          xy=xyc,
+                                                          xycoords="axes fraction",
+                                                          fontsize=15,
+                                                          color='black',
+                                                          va="center",
+                                                          ha="center",
+                                                          rotation=350,
+                                                           bbox=bb(bbc))
+    an1 = func_annotate("ambiguous", xyc=(0.9, 0.5), bbc='black')
+    an2 = func_annotate("easy-to-learn", xyc=(0.27, 0.85), bbc='r')
+    an3 = func_annotate("hard-to-learn", xyc=(0.35, 0.25), bbc='b')
+
 
     if not show_hist:
         plot.legend(ncol=1, bbox_to_anchor=[0.175, 0.5], loc='right')
@@ -295,9 +307,9 @@ def plot_data_map(dataframe:pd.DataFrame,
         plot.set_title(f"{title}-{model} Data Map", fontsize=17)
 
         # Make the histograms.
-        ax1 = fig.add_subplot(gs[1, 0])
+        ax1 = fig.add_subplot(gs[0, 1])
         ax2 = fig.add_subplot(gs[1, 1])
-        ax3 = fig.add_subplot(gs[1, 2])
+        ax3 = fig.add_subplot(gs[2, 1])
 
         plott0 = dataframe.hist(column=['confidence'], ax=ax1, color='#622a87')
         plott0[0].set_title('')
@@ -307,25 +319,27 @@ def plot_data_map(dataframe:pd.DataFrame,
         plott1 = dataframe.hist(column=['variability'], ax=ax2, color='teal')
         plott1[0].set_title('')
         plott1[0].set_xlabel('variability')
+        plott1[0].set_ylabel('density')
 
-        plot2 = sns.countplot(x="correct.", data=dataframe, color='#86bf91', ax=ax3)
+        plot2 = sns.countplot(x="correct.", data=dataframe, ax=ax3, color='#86bf91')
         ax3.xaxis.grid(True) # Show the vertical gridlines
 
         plot2.set_title('')
         plot2.set_xlabel('correctness')
-        plot2.set_ylabel('')
+        plot2.set_ylabel('density')
 
     fig.tight_layout()
     filename = f'{plot_dir}/{title}_{model}.pdf' if show_hist else f'figures/compact_{title}_{model}.pdf'
     fig.savefig(filename, dpi=300)
+    logger.info(f"Plot saved to {filename}")
 
 
 if __name__ == "__main__":
   parser = argparse.ArgumentParser()
-  parser.add_argument("--do_filter",
+  parser.add_argument("--filter",
                       action="store_true",
                       help="Whether to filter data subsets based on specified `metric`.")
-  parser.add_argument("--do_plots",
+  parser.add_argument("--plot",
                       action="store_true",
                       help="Whether to plot data maps and save as `pdf`.")
   parser.add_argument("--model_dir",
@@ -339,7 +353,7 @@ if __name__ == "__main__":
                       type=os.path.abspath,
                       help="Directory where data for task resides.")
   parser.add_argument("--plots_dir",
-                      default="/Users/swabhas/Documents/exemplars_plots/",
+                      default="./cartography/",
                       type=os.path.abspath,
                       help="Directory where plots are to be saved.")
   parser.add_argument("--task_name",
@@ -353,14 +367,13 @@ if __name__ == "__main__":
                                'variability',
                                'correctness',
                                'forgetfulness'),
-                      default='variability',
                       help="Metric to filter data by.",)
   parser.add_argument("--include_ci",
                       action="store_true",
                       help="Compute the confidence interval for variability.")
   parser.add_argument("--filtering_output_dir",
                       "-f",
-                      default="/Users/swabhas/data/exemplars/variability_filtered/",
+                      default="./filtered/",
                       type=os.path.abspath,
                       help="Output directory where filtered datasets are to be written.")
   parser.add_argument("--worst",
@@ -374,11 +387,15 @@ if __name__ == "__main__":
                       type=int,
                       default=100,
                       help="# Epochs for which to compute train dynamics.")
+  parser.add_argument("--model",
+                      default="RoBERTa",
+                      help="Model for which data map is being plotted")
 
   args = parser.parse_args()
 
   training_dynamics = read_training_dynamics(args.model_dir,
-                                             strip_last=True if args.task_name in ["QNLI"] else False)
+                                             strip_last=True if args.task_name in ["QNLI"] else False,
+                                             burn_out=args.burn_out if args.burn_out < 100 else None)
   total_epochs = len(list(training_dynamics.values())[0]["logits"])
   if args.burn_out > total_epochs:
     args.burn_out = total_epochs
@@ -392,8 +409,15 @@ if __name__ == "__main__":
                            lines=True)
   logger.info(f"Metrics based on Training Dynamics written to {train_dy_filename}")
 
-  if args.do_filter:
+  if args.filter:
+    assert args.filtering_output_dir
+    if not os.path.exists(args.filtering_output_dir):
+      os.makedirs(args.filtering_output_dir)
+    assert args.metric
     write_filtered_data(args, train_dy_metrics)
 
-  if args.do_plotting:
-    plot_data_map(train_dy_metrics, args.plots_dir, title=args.task_name, show_hist=True)
+  if args.plot:
+    assert args.plots_dir
+    if not os.path.exists(args.plots_dir):
+      os.makedirs(args.plots_dir)
+    plot_data_map(train_dy_metrics, args.plots_dir, title=args.task_name, show_hist=True, model=args.model)
