@@ -1,6 +1,6 @@
 # Dataset Cartography
 
-Code for the paper [Dataset Cartography: Mapping and Diagnosing Datasets with Training Dynamics](https://arxiv.org/abs/2009.10795) at EMNLP 2020.
+Code for the paper [Dataset Cartography: Mapping and Diagnosing Datasets with Training Dynamics](https://aclanthology.org/2020.emnlp-main.746) at EMNLP 2020.
 
 This repository contains implementation of data maps, as well as other data selection baselines, along with notebooks for data map visualizations.
 
@@ -57,6 +57,15 @@ python -m cartography.selection.train_dy_filtering \
     --model $MODEL_NAME
 ```
 
+#### Data Map Coordinates
+
+The coordinates for producing RoBERTa-Large data maps for SNLI, QNLI, MNLI and WINOGRANDE, as reported in the paper can be found under `data/data_map_coordinates/`. Each `.jsonl` file contains the following fields for each instance in the train set:
+- `guid` : instance ID matching that in the original data file,
+- `index`,
+- `confidence`,
+- `variability`,
+- `correctness`.
+
 
 ### Data Selection
 
@@ -71,4 +80,31 @@ python -m cartography.selection.train_dy_filtering \
     --data_dir $PATH_TO_GLUE_DIR_WITH_ORIGINAL_DATA_IN_TSV_FORMAT
 ```
 
-Supported `$TASK`s include SNLI, QNLI, MNLI and WINOGRANDE, and `$METRIC`s include `confidence`, `variability`, `correctness`, `forgetfulness` and `threshold_closeness`; see [paper](https://arxiv.org/abs/2009.10795) for more details.
+Supported `$TASK`s include SNLI, QNLI, MNLI and WINOGRANDE, and `$METRIC`s include `confidence`, `variability`, `correctness`, `forgetfulness` and `threshold_closeness`; see [paper](https://aclanthology.org/2020.emnlp-main.746) for more details.
+
+
+### Contact and Reference
+
+For questions and usage issues, please contact `swabhas@allenai.org`. If you use dataset cartography for research, please cite [our paper](https://aclanthology.org/2020.emnlp-main.746) as follows:
+
+```
+@inproceedings{swayamdipta-etal-2020-dataset,
+    title = "Dataset Cartography: Mapping and Diagnosing Datasets with Training Dynamics",
+    author = "Swayamdipta, Swabha  and
+      Schwartz, Roy  and
+      Lourie, Nicholas  and
+      Wang, Yizhong  and
+      Hajishirzi, Hannaneh  and
+      Smith, Noah A.  and
+      Choi, Yejin",
+    booktitle = "Proceedings of the 2020 Conference on Empirical Methods in Natural Language Processing (EMNLP)",
+    month = nov,
+    year = "2020",
+    address = "Online",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/2020.emnlp-main.746",
+    doi = "10.18653/v1/2020.emnlp-main.746",
+    pages = "9275--9293",
+}
+```
+Copyright [2020] [Swabha Swayamdipta]
