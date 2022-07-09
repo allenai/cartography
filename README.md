@@ -14,8 +14,8 @@ If using, please cite:
     year={2020}
 }
 ```
-This repository can be used to build Data Maps, like the one below.
-![Data Map for SNLI using a RoBERTa-Large classifier](./sample/SNLI_RoBERTa.pdf)
+This repository can be used to build Data Maps, like [this one for SNLI using a RoBERTa-Large classifier](./sample/SNLI_RoBERTa.pdf).
+![SNLI Data Map with RoBERTa-Large](./sample/SNLI_RoBERTa.png)
 
 ### Pre-requisites
 
@@ -83,6 +83,9 @@ python -m cartography.selection.train_dy_filtering \
 Supported `$TASK`s include SNLI, QNLI, MNLI and WINOGRANDE, and `$METRIC`s include `confidence`, `variability`, `correctness`, `forgetfulness` and `threshold_closeness`; see [paper](https://aclanthology.org/2020.emnlp-main.746) for more details.
 
 
+To select _hard-to-learn_ instances, set `$METRIC` as "confidence" and for _ambiguous_, set `$METRIC` as "variability". For _easy-to-learn_ instances: set `$METRIC` as "confidence" and use the flag `--worst`.
+
+
 ### Contact and Reference
 
 For questions and usage issues, please contact `swabhas@allenai.org`. If you use dataset cartography for research, please cite [our paper](https://aclanthology.org/2020.emnlp-main.746) as follows:
@@ -108,3 +111,4 @@ For questions and usage issues, please contact `swabhas@allenai.org`. If you use
 }
 ```
 Copyright [2020] [Swabha Swayamdipta]
+
