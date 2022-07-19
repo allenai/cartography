@@ -779,7 +779,7 @@ def main():
     parser.add_argument("--test",
                         type=os.path.abspath,
                         help="OOD test set.")
-        parser.add_argument("--overwrite_output_dir",
+    parser.add_argument("--overwrite_output_dir",
                         action="store_true",
                         help="Whether to ovewrite output directory given by --output_dir.")
 
