@@ -779,6 +779,9 @@ def main():
     parser.add_argument("--test",
                         type=os.path.abspath,
                         help="OOD test set.")
+        parser.add_argument("--overwrite_output_dir",
+                        action="store_true",
+                        help="Whether to ovewrite output directory given by --output_dir.")
 
     # TODO(SS): Automatically map tasks to OOD test sets.
 
